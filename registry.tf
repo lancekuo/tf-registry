@@ -16,20 +16,17 @@ resource "aws_route53_record" "registry" {
 }
 
 resource "aws_iam_access_key" "register_puller" {
-    count    = "${terraform.env == "continuous-integration" && var.project == "ci" ? 0 : 1}"
     provider = "aws.${var.region}"
     user     = "${aws_iam_user.register_puller.name}"
 }
 
 resource "aws_iam_user" "register_puller" {
-    count    = "${terraform.env == "continuous-integration" && var.project == "ci" ? 0 : 1}"
     provider = "aws.${var.region}"
     name     = "${terraform.env}-${var.project}-docker-register-puller"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_puller_role" {
-    count    = "${terraform.env == "continuous-integration" && var.project == "ci" ? 0 : 1}"
     provider = "aws.${var.region}"
     name     = "${terraform.env}-${var.project}-docker-register-puller"
     user     = "${aws_iam_user.register_puller.name}"
@@ -60,20 +57,17 @@ EOF
 }
 
 resource "aws_iam_access_key" "register_pusher" {
-    count    = "${terraform.env == "continuous-integration" && var.project == "ci" ? 1 : 0}"
     provider = "aws.${var.region}"
     user     = "${aws_iam_user.register_pusher.name}"
 }
 
 resource "aws_iam_user" "register_pusher" {
-    count    = "${terraform.env == "continuous-integration" && var.project == "ci" ? 1 : 0}"
     provider = "aws.${var.region}"
     name     = "${terraform.env}-${var.project}-docker-register-pusher"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_pusher_role" {
-    count    = "${terraform.env == "continuous-integration" && var.project == "ci" ? 1 : 0}"
     provider = "aws.${var.region}"
     name     = "${terraform.env}-${var.project}-docker-register-pusher"
     user     = "${aws_iam_user.register_pusher.name}"
