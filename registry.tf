@@ -1,14 +1,6 @@
-resource "aws_route53_zone" "internal" {
-    provider = "aws.${var.region}"
-    name     = "${var.project}.internal"
-    vpc_id   = "${var.vpc_default_id}"
-    tags {
-        Environment = "${terraform.env}"
-    }
-}
 resource "aws_route53_record" "registry" {
     provider = "aws.${var.region}"
-    zone_id  = "${aws_route53_zone.internal.zone_id}"
+    zone_id  = "${var.internal_zone_id}"
     name     = "${terraform.env}-registry.${var.project}.internal"
     type     = "A"
     ttl      = "300"

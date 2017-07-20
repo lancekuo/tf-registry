@@ -6,6 +6,8 @@ variable "bastion_private_ip" {}
 variable "bastion_private_key_path" {}
 variable "security_group_node_id" {}
 
+variable "internal_zone_id" {}
+
 provider "aws" {
     alias  = "${var.region}"
     region = "${var.region}"
