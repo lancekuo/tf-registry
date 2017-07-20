@@ -123,7 +123,7 @@ resource "null_resource" "registry_trigger" {
 
     provisioner "remote-exec" {
         inline = [
-            "docker rm -f registry_stg >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.env == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.env == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${aws_s3_bucket.registry.id} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_stg --restart always registry:2",
+            "docker rm -f registry_${terraform.env} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.env == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.env == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${aws_s3_bucket.registry.id} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.env} --restart always registry:2",
         ]
         connection {
             type        = "ssh"
