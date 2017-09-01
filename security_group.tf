@@ -1,6 +1,6 @@
 resource "aws_security_group" "registry" {
     provider    = "aws.${var.region}"
-    name        = "${terraform.env}-${var.project}-registry"
+    name        = "${terraform.workspace}-${var.project}-registry"
     description = "Port for access regisry from nodes"
     vpc_id      = "${var.vpc_default_id}"
 
@@ -11,8 +11,8 @@ resource "aws_security_group" "registry" {
         security_groups = ["${var.security_group_node_id}"]
     }
     tags {
-        Name    = "${terraform.env}-${var.project}-registry"
-        Env     = "${terraform.env}"
+        Name    = "${terraform.workspace}-${var.project}-registry"
+        Env     = "${terraform.workspace}"
         Project = "${var.project}"
     }
 }

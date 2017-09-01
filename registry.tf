@@ -1,7 +1,7 @@
 resource "aws_route53_record" "registry" {
     provider = "aws.${var.region}"
     zone_id  = "${var.internal_zone_id}"
-    name     = "${terraform.env}-registry.${var.project}.internal"
+    name     = "${terraform.workspace}-registry.${var.project}.internal"
     type     = "A"
     ttl      = "300"
     records  = ["${var.bastion_private_ip}"]
@@ -14,13 +14,13 @@ resource "aws_iam_access_key" "register_puller" {
 
 resource "aws_iam_user" "register_puller" {
     provider = "aws.${var.region}"
-    name     = "${terraform.env}-${var.project}-docker-register-puller"
+    name     = "${terraform.workspace}-${var.project}-docker-register-puller"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_puller_role" {
     provider = "aws.${var.region}"
-    name     = "${terraform.env}-${var.project}-docker-register-puller"
+    name     = "${terraform.workspace}-${var.project}-docker-register-puller"
     user     = "${aws_iam_user.register_puller.name}"
 
     policy   = <<EOF
@@ -55,13 +55,13 @@ resource "aws_iam_access_key" "register_pusher" {
 
 resource "aws_iam_user" "register_pusher" {
     provider = "aws.${var.region}"
-    name     = "${terraform.env}-${var.project}-docker-register-pusher"
+    name     = "${terraform.workspace}-${var.project}-docker-register-pusher"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_pusher_role" {
     provider = "aws.${var.region}"
-    name     = "${terraform.env}-${var.project}-docker-register-pusher"
+    name     = "${terraform.workspace}-${var.project}-docker-register-pusher"
     user     = "${aws_iam_user.register_pusher.name}"
 
     policy   = <<EOF
@@ -110,7 +110,7 @@ resource "aws_s3_bucket" "registry" {
 
     tags {
         Name        = "Registry"
-        Environment = "${terraform.env}"
+        Environment = "${terraform.workspace}"
     }
 }
 
@@ -123,7 +123,7 @@ resource "null_resource" "registry_trigger" {
 
     provisioner "remote-exec" {
         inline = [
-            "docker rm -f registry_${terraform.env} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.env == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.env == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${aws_s3_bucket.registry.id} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.env} --restart always registry:2",
+            "docker rm -f registry_${terraform.workspace} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.workspace == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.workspace == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${aws_s3_bucket.registry.id} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.workspace} --restart always registry:2",
         ]
         connection {
             type        = "ssh"
