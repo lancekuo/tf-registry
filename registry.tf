@@ -1,6 +1,6 @@
 resource "aws_route53_record" "registry" {
-    provider = "aws.${var.region}"
-    zone_id  = "${var.internal_zone_id}"
+    provider = "aws.${var.aws_region}"
+    zone_id  = "${var.route53_internal_zone_id}"
     name     = "${terraform.workspace}-registry.${var.project}.internal"
     type     = "A"
     ttl      = "300"
@@ -8,18 +8,18 @@ resource "aws_route53_record" "registry" {
 }
 
 resource "aws_iam_access_key" "register_puller" {
-    provider = "aws.${var.region}"
+    provider = "aws.${var.aws_region}"
     user     = "${aws_iam_user.register_puller.name}"
 }
 
 resource "aws_iam_user" "register_puller" {
-    provider = "aws.${var.region}"
+    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-puller"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_puller_role" {
-    provider = "aws.${var.region}"
+    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-puller"
     user     = "${aws_iam_user.register_puller.name}"
 
@@ -49,18 +49,18 @@ EOF
 }
 
 resource "aws_iam_access_key" "register_pusher" {
-    provider = "aws.${var.region}"
+    provider = "aws.${var.aws_region}"
     user     = "${aws_iam_user.register_pusher.name}"
 }
 
 resource "aws_iam_user" "register_pusher" {
-    provider = "aws.${var.region}"
+    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-pusher"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_pusher_role" {
-    provider = "aws.${var.region}"
+    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-pusher"
     user     = "${aws_iam_user.register_pusher.name}"
 
@@ -100,7 +100,7 @@ EOF
 }
 
 resource "aws_s3_bucket" "registry" {
-    provider = "aws.${var.region}"
+    provider = "aws.${var.aws_region}"
     bucket = "registry.hub.internal"
     acl    = "private"
     lifecycle         = {
@@ -123,13 +123,13 @@ resource "null_resource" "registry_trigger" {
 
     provisioner "remote-exec" {
         inline = [
-            "docker rm -f registry_${terraform.workspace} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.workspace == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.workspace == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${aws_s3_bucket.registry.id} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.workspace} --restart always registry:2",
+            "docker rm -f registry_${terraform.workspace} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.workspace == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.workspace == "continuous-integration" && var.project == "ci" ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.aws_region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.aws_region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${aws_s3_bucket.registry.id} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.workspace} --restart always registry:2",
         ]
         connection {
             type        = "ssh"
             user        = "ubuntu"
             host        = "${var.bastion_public_ip}"
-            private_key = "${file("${path.root}${var.bastion_private_key_path}")}"
+            private_key = "${file("${path.root}${var.rsa_key_bastion["private_key_path"]}")}"
         }
     }
 }

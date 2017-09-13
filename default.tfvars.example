@@ -1,0 +1,13 @@
+aws_region="us-east-1"
+project="SampleProject"
+vpc_default_id="vpc-d6b711b0"
+bastion_public_ip="52.10.189.24"
+bastion_private_ip="10.0.0.1"
+security_group_node_id="sg-38017849"
+route53_internal_zone_id="Z28XL16X0WGUTB"
+
+rsa_key_bastion = {
+    "public_key_path"  = "/keys/bastion.pub"
+    "private_key_path" = "/keys/bastion"
+    "aws_key_name"     = "bastion"
+}
