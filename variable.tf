@@ -6,6 +6,7 @@ variable "bastion_private_ip"       {}
 variable "security_group_node_id"   {}
 variable "route53_internal_zone_id" {}
 variable "rsa_key_bastion"          {type="map"}
+variable "s3_bucketname_registry"   {}
 
 provider "aws" {
     alias  = "${var.aws_region}"

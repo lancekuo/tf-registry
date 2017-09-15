@@ -101,7 +101,7 @@ EOF
 
 resource "aws_s3_bucket" "registry" {
     provider = "aws.${var.aws_region}"
-    bucket = "registry.hub.internal"
+    bucket = "${var.s3_bucketname_registry}"
     acl    = "private"
     lifecycle         = {
         ignore_changes  = "*"
