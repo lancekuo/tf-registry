@@ -7,8 +7,10 @@ variable "security_group_node_id"   {}
 variable "route53_internal_zone_id" {}
 variable "rsa_key_bastion"          {type="map"}
 variable "s3_bucketname_registry"   {}
+variable "aws_profile"              {}
 
 provider "aws" {
-    alias  = "${var.aws_region}"
-    region = "${var.aws_region}"
+    alias   = "${var.aws_region}"
+    region  = "${var.aws_region}"
+    profile = "${var.aws_profile}"
 }
