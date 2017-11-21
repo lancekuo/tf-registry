@@ -34,14 +34,14 @@ resource "aws_iam_user_policy" "register_puller_role" {
                 "s3:GetBucketLocation",
                 "s3:ListBucketMultipartUploads"
             ],
-            "Resource": "${aws_s3_bucket.registry.arn}"
+            "Resource": "${format("arn:aws:s3:::%s", var.s3_bucketname_registry)}"
         },
         {
             "Effect": "Allow",
             "Action": [
                 "s3:GetObject"
             ],
-            "Resource": "${aws_s3_bucket.registry.arn}/*"
+            "Resource": "${format("arn:aws:s3:::%s/*", var.s3_bucketname_registry)}"
         }
     ]
 }
@@ -76,7 +76,7 @@ resource "aws_iam_user_policy" "register_pusher_role" {
                 "s3:ListBucketMultipartUploads"
             ],
             "Resource": [
-                "${aws_s3_bucket.registry.arn}",
+                "${format("arn:aws:s3:::%s", var.s3_bucketname_registry)}",
                 "arn:aws:s3:::docker-env-config"
             ]
         },
@@ -90,8 +90,7 @@ resource "aws_iam_user_policy" "register_pusher_role" {
                 "s3:AbortMultipartUpload"
             ],
             "Resource": [
-                "${aws_s3_bucket.registry.arn}/*",
-                "arn:aws:s3:::docker-env-config/*"
+                "${format("arn:aws:s3:::%s/*", var.s3_bucketname_registry)}"
             ]
         }
     ]
@@ -130,7 +129,7 @@ resource "aws_s3_bucket_object" "docker" {
 
 resource "null_resource" "registry_trigger" {
     triggers {
-        registry_id = "${aws_s3_bucket.registry.id}"
+        registry_id = "${var.s3_bucketname_registry}"
         record_name = "${aws_route53_record.registry.name}"
         bastion_ip  = "${var.bastion_public_ip}"
     }

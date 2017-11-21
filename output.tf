@@ -7,6 +7,3 @@ output "access" {
 output "registry_internal_dns" {
     value = "${aws_route53_record.registry.fqdn}"
 }
-output "registry_bucket_id" {
-    value = "${aws_s3_bucket.registry.id}"
-}
