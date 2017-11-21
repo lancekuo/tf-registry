@@ -100,10 +100,11 @@ EOF
 }
 
 resource "aws_s3_bucket" "registry" {
-    provider = "aws.${var.aws_region}"
-    bucket = "${var.s3_bucketname_registry}"
-    acl    = "private"
-    lifecycle         = {
+    count     = "${var.create_bucket}"
+    provider  = "aws.${var.aws_region}"
+    bucket    = "${var.s3_bucketname_registry}"
+    acl       = "private"
+    lifecycle = {
         ignore_changes  = "*"
         prevent_destroy = true
     }
@@ -115,12 +116,13 @@ resource "aws_s3_bucket" "registry" {
 }
 
 resource "aws_s3_bucket_object" "docker" {
-    provider = "aws.${var.aws_region}"
-    bucket = "${aws_s3_bucket.registry.id}"
-    acl    = "private"
-    key    = "docker/"
-    source = "/dev/null"
-    lifecycle         = {
+    count     = "${var.create_bucket}"
+    provider  = "aws.${var.aws_region}"
+    bucket    = "${aws_s3_bucket.registry.id}"
+    acl       = "private"
+    key       = "docker/"
+    source    = "/dev/null"
+    lifecycle = {
         ignore_changes  = "*"
         prevent_destroy = true
     }
@@ -135,7 +137,7 @@ resource "null_resource" "registry_trigger" {
 
     provisioner "remote-exec" {
         inline = [
-            "docker rm -f registry_${terraform.workspace} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.workspace == var.ci_workspace_name && var.project == var.ci_project_name ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.workspace == var.ci_workspace_name && var.project == var.ci_project_name ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.aws_region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.aws_region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${aws_s3_bucket.registry.id} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.workspace} --restart always registry:2",
+            "docker rm -f registry_${terraform.workspace} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${terraform.workspace == var.ci_workspace_name && var.project == var.ci_project_name ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${terraform.workspace == var.ci_workspace_name && var.project == var.ci_project_name ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.aws_region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.aws_region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${var.s3_bucketname_registry} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.workspace} --restart always registry:2",
         ]
         connection {
             type        = "ssh"
