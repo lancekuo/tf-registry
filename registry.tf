@@ -114,6 +114,18 @@ resource "aws_s3_bucket" "registry" {
     }
 }
 
+resource "aws_s3_bucket_object" "docker" {
+    provider = "aws.${var.aws_region}"
+    bucket = "${aws_s3_bucket.registry.id}"
+    acl    = "private"
+    key    = "docker/"
+    source = "/dev/null"
+    lifecycle         = {
+        ignore_changes  = "*"
+        prevent_destroy = true
+    }
+}
+
 resource "null_resource" "registry_trigger" {
     triggers {
         registry_id = "${aws_s3_bucket.registry.id}"
