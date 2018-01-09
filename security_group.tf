@@ -1,5 +1,4 @@
 resource "aws_security_group" "registry" {
-    provider    = "aws.${var.aws_region}"
     name        = "${terraform.workspace}-${var.project}-registry"
     description = "Port for access regisry from nodes"
     vpc_id      = "${var.vpc_default_id}"

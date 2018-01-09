@@ -1,5 +1,4 @@
 resource "aws_route53_record" "registry" {
-    provider = "aws.${var.aws_region}"
     zone_id  = "${var.route53_internal_zone_id}"
     name     = "${terraform.workspace}-registry.${var.project}.internal"
     type     = "A"
@@ -8,18 +7,15 @@ resource "aws_route53_record" "registry" {
 }
 
 resource "aws_iam_access_key" "register_puller" {
-    provider = "aws.${var.aws_region}"
     user     = "${aws_iam_user.register_puller.name}"
 }
 
 resource "aws_iam_user" "register_puller" {
-    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-puller"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_puller_role" {
-    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-puller"
     user     = "${aws_iam_user.register_puller.name}"
 
@@ -49,18 +45,15 @@ EOF
 }
 
 resource "aws_iam_access_key" "register_pusher" {
-    provider = "aws.${var.aws_region}"
     user     = "${aws_iam_user.register_pusher.name}"
 }
 
 resource "aws_iam_user" "register_pusher" {
-    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-pusher"
     path     = "/system/"
 }
 
 resource "aws_iam_user_policy" "register_pusher_role" {
-    provider = "aws.${var.aws_region}"
     name     = "${terraform.workspace}-${var.project}-docker-register-pusher"
     user     = "${aws_iam_user.register_pusher.name}"
 
@@ -100,7 +93,6 @@ EOF
 
 resource "aws_s3_bucket" "registry" {
     count     = "${var.create_bucket}"
-    provider  = "aws.${var.aws_region}"
     bucket    = "${var.s3_bucketname_registry}"
     acl       = "private"
     lifecycle = {
@@ -116,7 +108,6 @@ resource "aws_s3_bucket" "registry" {
 
 resource "aws_s3_bucket_object" "docker" {
     count     = "${var.create_bucket}"
-    provider  = "aws.${var.aws_region}"
     bucket    = "${aws_s3_bucket.registry.id}"
     acl       = "private"
     key       = "docker/"

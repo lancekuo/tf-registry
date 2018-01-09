@@ -12,8 +12,3 @@ variable "ci_workspace_name"        {}
 variable "ci_project_name"          {}
 
 variable "aws_profile"              {}
-provider "aws" {
-    alias   = "${var.aws_region}"
-    region  = "${var.aws_region}"
-    profile = "${var.aws_profile}"
-}
