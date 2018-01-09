@@ -6,8 +6,8 @@ bastion_private_ip       = "10.0.0.1"
 security_group_node_id   = "sg-38017849"
 route53_internal_zone_id = "Z28XL16X0WGUTB"
 s3_bucketname_registry   = "registry.internal"
-ci_workspace_name        = "ci"
-ci_project_name          = "jks"
+create_registry_bucket   = true
+enableRegistryPush       = false
 
 aws_profile              = "default"
 rsa_key_bastion = {

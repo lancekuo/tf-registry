@@ -7,8 +7,7 @@ variable "security_group_node_id"   {}
 variable "route53_internal_zone_id" {}
 variable "rsa_key_bastion"          {type="map"}
 variable "s3_bucketname_registry"   {}
-variable "create_bucket"            {}
-variable "ci_workspace_name"        {}
-variable "ci_project_name"          {}
+variable "create_registry_bucket"   {}
+variable "enableRegistryPush"       {}
 
 variable "aws_profile"              {}
