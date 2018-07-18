@@ -9,5 +9,3 @@ variable "rsa_key_bastion"          {type="map"}
 variable "s3_bucketname_registry"   {}
 variable "create_registry_bucket"   {}
 variable "enableRegistryPush"       {}
-
-variable "aws_profile"              {}

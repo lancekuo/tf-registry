@@ -10,8 +10,7 @@ resource "aws_security_group" "registry" {
         security_groups = ["${var.security_group_node_id}"]
     }
     tags {
-        Name    = "${terraform.workspace}-${var.project}-registry"
-        Env     = "${terraform.workspace}"
-        Project = "${var.project}"
+        Environment = "${terraform.workspace}"
+        Project     = "${var.project}"
     }
 }

@@ -1,6 +1,6 @@
 resource "aws_route53_record" "registry" {
     zone_id  = "${var.route53_internal_zone_id}"
-    name     = "${terraform.workspace}-registry.${var.project}.internal"
+    name     = "hub"
     type     = "A"
     ttl      = "300"
     records  = ["${var.bastion_private_ip}"]

@@ -9,7 +9,6 @@ s3_bucketname_registry   = "registry.internal"
 create_registry_bucket   = true
 enableRegistryPush       = false
 
-aws_profile              = "default"
 rsa_key_bastion = {
     "public_key_path"  = "/keys/bastion.pub"
     "private_key_path" = "/keys/bastion"
