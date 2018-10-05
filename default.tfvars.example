@@ -5,11 +5,11 @@ bastion_public_ip        = "52.10.189.24"
 bastion_private_ip       = "10.0.0.1"
 security_group_node_id   = "sg-38017849"
 route53_internal_zone_id = "Z28XL16X0WGUTB"
-s3_bucketname_registry   = "registry.internal"
-create_registry_bucket   = true
+registry_bucketname      = "registry.internal"
+enableRegistryBucket     = true
 enableRegistryPush       = false
 
-rsa_key_bastion = {
+bastion_rsa_key = {
     "public_key_path"  = "/keys/bastion.pub"
     "private_key_path" = "/keys/bastion"
     "aws_key_name"     = "bastion"

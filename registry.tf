@@ -30,14 +30,14 @@ resource "aws_iam_user_policy" "register_puller_role" {
                 "s3:GetBucketLocation",
                 "s3:ListBucketMultipartUploads"
             ],
-            "Resource": "${format("arn:aws:s3:::%s", var.s3_bucketname_registry)}"
+            "Resource": "${format("arn:aws:s3:::%s", var.registry_bucketname)}"
         },
         {
             "Effect": "Allow",
             "Action": [
                 "s3:GetObject"
             ],
-            "Resource": "${format("arn:aws:s3:::%s/*", var.s3_bucketname_registry)}"
+            "Resource": "${format("arn:aws:s3:::%s/*", var.registry_bucketname)}"
         }
     ]
 }
@@ -69,7 +69,7 @@ resource "aws_iam_user_policy" "register_pusher_role" {
                 "s3:ListBucketMultipartUploads"
             ],
             "Resource": [
-                "${format("arn:aws:s3:::%s", var.s3_bucketname_registry)}",
+                "${format("arn:aws:s3:::%s", var.registry_bucketname)}",
                 "arn:aws:s3:::docker-env-config"
             ]
         },
@@ -83,7 +83,7 @@ resource "aws_iam_user_policy" "register_pusher_role" {
                 "s3:AbortMultipartUpload"
             ],
             "Resource": [
-                "${format("arn:aws:s3:::%s/*", var.s3_bucketname_registry)}"
+                "${format("arn:aws:s3:::%s/*", var.registry_bucketname)}"
             ]
         }
     ]
@@ -92,8 +92,8 @@ EOF
 }
 
 resource "aws_s3_bucket" "registry" {
-    count     = "${var.create_registry_bucket}"
-    bucket    = "${var.s3_bucketname_registry}"
+    count     = "${var.enableRegistryBucket}"
+    bucket    = "${var.registry_bucketname}"
     acl       = "private"
     lifecycle = {
         ignore_changes  = "*"
@@ -107,7 +107,7 @@ resource "aws_s3_bucket" "registry" {
 }
 
 resource "aws_s3_bucket_object" "docker" {
-    count     = "${var.create_registry_bucket}"
+    count     = "${var.enableRegistryBucket}"
     bucket    = "${aws_s3_bucket.registry.id}"
     acl       = "private"
     key       = "docker/"
@@ -120,20 +120,20 @@ resource "aws_s3_bucket_object" "docker" {
 
 resource "null_resource" "registry_trigger" {
     triggers {
-        registry_id = "${var.s3_bucketname_registry}"
+        registry_id = "${var.registry_bucketname}"
         record_name = "${aws_route53_record.registry.name}"
         bastion_ip  = "${var.bastion_public_ip}"
     }
 
     provisioner "remote-exec" {
         inline = [
-            "docker rm -f registry_${terraform.workspace} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${var.enableRegistryPush ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${var.enableRegistryPush ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.aws_region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.aws_region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${var.s3_bucketname_registry} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.workspace} --restart always registry:2",
+            "docker rm -f registry_${terraform.workspace} >/dev/null;docker run -d -e REGISTRY_STORAGE=s3 -e REGISTRY_STORAGE_S3_ACCESSKEY=${var.enableRegistryPush ? aws_iam_access_key.register_pusher.id : aws_iam_access_key.register_puller.id} -e REGISTRY_STORAGE_S3_SECRETKEY=${var.enableRegistryPush ? aws_iam_access_key.register_pusher.secret : aws_iam_access_key.register_puller.secret} -e REGISTRY_STORAGE_S3_REGION=${var.aws_region} -e REGISTRY_STORAGE_S3_REGIONENDPOINT=http://s3.${var.aws_region}.amazonaws.com -e REGISTRY_STORAGE_S3_BUCKET=${var.registry_bucketname} -e REGISTRY_STORAGE_S3_V4AUTH=true -e REGISTRY_STORAGE_S3_ROOTDIRECTORY=/ -p 80:5000 --name registry_${terraform.workspace} --restart always registry:2",
         ]
         connection {
             type        = "ssh"
             user        = "ubuntu"
             host        = "${var.bastion_public_ip}"
-            private_key = "${file("${path.root}${var.rsa_key_bastion["private_key_path"]}")}"
+            private_key = "${file("${path.root}${var.bastion_rsa_key["private_key_path"]}")}"
         }
     }
 }
